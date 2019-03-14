@@ -444,7 +444,7 @@ def submit_key(tid, pid, key, method, uid=None, ip=None):
 
     if pid in get_solved_pids(tid=tid):
         exp = WebException(
-            "You or one of your teammates have already solved this problem.")
+            "Flag correct: however, your team has already gained those points.")
         exp.data = {'code': 'solved'}
         raise exp
 
@@ -476,7 +476,7 @@ def submit_key(tid, pid, key, method, uid=None, ip=None):
     if (key, pid) in [(submission["key"], submission["pid"])
                       for submission in get_submissions(tid=tid)]:
         exp = WebException(
-            "You or one of your teammates have already tried this solution.")
+            "Flag incorrect. Your team has also tried it before.")
         exp.data = {'code': 'repeat'}
         raise exp
 
