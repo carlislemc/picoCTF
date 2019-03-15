@@ -1,1 +1,11 @@
-*.png binary
+# This is a catch-all that overrides per-user options like 'autocrlf' 
+# but also relies on git's heuristic detection of textual files. Git does
+# well at this detection except for files that contain both text and 
+# binary blobs, or data that is readable but really meant to be opaque
+
+*		text=auto
+
+# Here are some examples of overriding Git auto-detection
+
+*.png		binary
+*.tf		text eol=lf
