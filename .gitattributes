@@ -9,4 +9,4 @@
 
 *.png		binary
 *.tf		text eol=lf
-.sh   text eof=lf
+*.sh   text eof=lf
