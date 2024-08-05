@@ -34,7 +34,7 @@ M is the amount of memory in GB
 SIP is shell IP address (default is 192.168.2.2)
 WIP is web IP address (default is 192.68.2.3)
 
-J=2 M=6 SIP=192.168.2.53 WIP=192.168.2.52 vagrant up shell && SIP=192.168.2.53 WIP=192.168.2.52 vagrant up web
+J=2 M=6 SIP=192.168.2.53 WIP=192.168.2.52 vagrant up shell && J=2 M=4 SIP=192.168.2.53 WIP=192.168.2.52 vagrant up web
 
 
 ## Project Overview
