@@ -2,15 +2,25 @@
 # Playbook that installs MongoDB and associated utilities
 # TODO: Consolidate mongodb tasks into web
 
-- name: Add apt key by id
-  apt_key:
-    keyserver: "{{mongodb_apt_keyserver}}"
-    id: "{{mongodb_apt_key_id}}"
 
-- name: Add repository
-  apt_repository:
-    repo: "{{ mongodb_repo }}"
-    state: present
+- name: Add apt key by id
+  shell: "apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5"
+  become: yes
+
+- name: Add apt source by id
+  shell: 'echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list'
+  become: yes
+
+
+#- name: Add apt key by id
+#  apt_key:
+#    keyserver: "{{mongodb_apt_keyserver}}"
+#    id: "{{mongodb_apt_key_id}}"
+
+#- name: Add repository
+#  apt_repository:
+#    repo: "{{ mongodb_repo }}"
+#    state: present
 
 - name: Update apt
   apt:
@@ -18,6 +28,7 @@
 
 - name: Install mongo
   apt:
+    allow_unauthenticated: true
     name: ['mongodb-org']  # from PPA
     state: present
 

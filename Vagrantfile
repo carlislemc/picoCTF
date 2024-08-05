@@ -15,6 +15,7 @@ end
 
 Vagrant.configure("2") do |config|
   config.vm.define "shell", primary: true do |shell|
+    shell.vm.disk :disk, size: "100GB", primary:true
     shell.vm.box = "ubuntu/xenial64"
     shell.vm.network "private_network", ip: (ENV['SIP'] || '192.168.2.3')
 
