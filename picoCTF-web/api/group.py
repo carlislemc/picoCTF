@@ -144,7 +144,7 @@ def create_group(tid, group_name):
 
     gid = api.common.token()
 
-    db.groups.insert({
+    db.groups.insert_one({
         "name": group_name,
         "owner": tid,
         "teachers": [],
@@ -192,7 +192,7 @@ def change_group_settings(gid, settings):
         raise InternalException(
             "You can not change a hidden classroom back to a public classroom.")
 
-    db.groups.update({"gid": group["gid"]}, {"$set": {"settings": settings}})
+    db.groups.update_one({"gid": group["gid"]}, {"$set": {"settings": settings}})
 
 
 @log_action
@@ -215,7 +215,7 @@ def join_group(gid, tid, teacher=False):
         for uid in uids:
             api.admin.give_teacher_role(uid=uid)
 
-    db.groups.update({'gid': gid}, {'$push': {role_group: tid}})
+    db.groups.update_one({'gid': gid}, {'$push': {role_group: tid}})
 
 
 def sync_teacher_status(tid, uid):
@@ -225,14 +225,14 @@ def sync_teacher_status(tid, uid):
 
     db = api.common.get_conn()
 
-    active_teacher_roles = db.groups.find({
+    active_teacher_roles = sum(1 for _ in db.groups.find({
         "$or": [{
             "teachers": tid
         }, {
             "owner": uid
         }]
-    }).count()
-    db.users.update({
+    }))
+    db.users.update_one({
         "uid": uid
     }, {"$set": {
         "teacher": active_teacher_roles > 0
@@ -259,10 +259,10 @@ def leave_group(gid, tid):
     if roles["owner"]:
         raise InternalException("Owners can not leave their own classroom!")
     elif roles["teacher"]:
-        db.groups.update({'gid': gid}, {'$pull': {"teachers": tid}})
+        db.groups.update_one({'gid': gid}, {'$pull': {"teachers": tid}})
 
     if roles["member"]:
-        db.groups.update({'gid': gid}, {'$pull': {"members": tid}})
+        db.groups.update_one({'gid': gid}, {'$pull': {"members": tid}})
 
 
 def switch_role(gid, tid, role):
@@ -278,7 +278,7 @@ def switch_role(gid, tid, role):
     roles = get_roles_in_group(gid, tid=team["tid"])
     if role == "member":
         if roles["teacher"] and not roles["member"]:
-            db.groups.update({
+            db.groups.update_one({
                 "gid": gid
             }, {
                 "$pull": {
@@ -294,7 +294,7 @@ def switch_role(gid, tid, role):
     elif role == "teacher":
         if api.team.is_teacher_team(tid):
             if roles["member"] and not roles["teacher"]:
-                db.groups.update({
+                db.groups.update_one({
                     "gid": gid
                 }, {
                     "$push": {
@@ -328,7 +328,7 @@ def delete_group(gid):
 
     db = api.common.get_conn()
 
-    db.groups.remove({'gid': gid})
+    db.groups.delete_many({'gid': gid})
 
 
 def get_all_groups():

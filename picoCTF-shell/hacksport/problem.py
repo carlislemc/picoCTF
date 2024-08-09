@@ -317,7 +317,7 @@ class FlaskApp(WebService):
             assert False, "Python version {} is invalid".format(python_version)
 
         self.service_files = [File(self.app_file)]
-        self.start_cmd = "uwsgi --protocol=http --plugin python{} -p {} -w {} --logto /dev/null".format(
+        self.start_cmd = "uwsgi --protocol=http --plugins-dir=/usr/lib/uwsgi --plugin python{} -p {} -w {} --logto /dev/null".format(
             plugin_version, self.num_workers, self.app)
 
 
@@ -335,5 +335,5 @@ class PHPApp(WebService):
         """
 
         web_root = join(self.directory, self.php_root)
-        self.start_cmd = "uwsgi --protocol=http --plugin php -p {1} --force-cwd {0} --http-socket-modifier1 14 --php-index index.html --php-index index.php --check-static {0} --static-skip-ext php --logto /dev/null".format(
+        self.start_cmd = "uwsgi --protocol=http --plugins-dir=/usr/lib/uwsgi --plugin php -p {1} --force-cwd {0} --http-socket-modifier1 14 --php-index index.html --php-index index.php --check-static {0} --static-skip-ext php --logto /dev/null".format(
             web_root, self.num_workers)

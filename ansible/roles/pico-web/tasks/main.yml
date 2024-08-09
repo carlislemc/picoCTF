@@ -1,27 +1,27 @@
 ---
 # Playbook that installs and configures picoCTF-web servers
 
-- include: dependencies.yml
+- import_tasks: dependencies.yml
   tags:
     - network
     - dependency
 
-- include: nodejs.yml
+- import_tasks: nodejs.yml
   tags:
     - network
     - dependency
 
-- include: nginx.yml
+- import_tasks: nginx.yml
 
-- include: picoCTF-webapp.yml
+- import_tasks: picoCTF-webapp.yml
   tags:
     - devploy
 
-- include: gunicorn.yml
+- import_tasks: gunicorn.yml
 
-- include: daemons.yml
+- import_tasks: daemons.yml
 
-- include: auto_configure.yml
+- import_tasks: auto_configure.yml
 
 - name: Ensure nginx is running
   service:

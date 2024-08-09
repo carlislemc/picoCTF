@@ -137,7 +137,7 @@ def get_all_team_scores(eligible=None, country=None, show_ineligible=False):
                 #'eligible': eligible,
                 'correct': True
             })
-            if team_query.count() > 0:
+            if sum(1 for _ in team_query.clone()) > 0:
                 lastsubmit = team_query.sort(
                     'timestamp', direction=pymongo.DESCENDING)[0]['timestamp']
             else:
@@ -338,7 +338,7 @@ def get_problem_solves(name=None, pid=None):
 
     problem = api.problem.get_problem(name=name, pid=pid)
 
-    return db.submissions.find({'pid': problem["pid"], 'correct': True}).count()
+    return sum(1 for _ in db.submissions.find({'pid': problem["pid"], 'correct': True}))
 
 
 @api.cache.memoize()
@@ -733,11 +733,11 @@ def print_review_comments():
 @api.cache.memoize()
 def get_registration_count():
     db = api.common.get_conn()
-    users = db.users.count()
+    users = db.users.count_documents({})
     stats = {
         "users": users,
-        "teams": db.teams.count() - users,
-        "groups": db.groups.count()
+        "teams": db.teams.count_documents({}) - users,
+        "groups": db.groups.count_documents({})
     }
     usernames = set(db.users.find({}).distinct("username"))
     team_names = set(db.teams.find({}).distinct("team_name"))
@@ -745,7 +745,7 @@ def get_registration_count():
     real_team_names = team_names - usernames
     real_team_ids = list(db.teams.find({"team_name": {"$in": list(real_team_names)}}).distinct("tid"))
 
-    teamed_users = db.users.count({"tid": {"$in": real_team_ids}})
+    teamed_users = db.users.count_documents({"tid": {"$in": real_team_ids}})
     stats["teamed_users"] = teamed_users
 
     return stats

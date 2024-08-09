@@ -135,10 +135,16 @@ def add_server(params):
     Returns:
        The sid.
     """
+    print("add_server")
+    try:
+        db = api.common.get_conn()
+    except:
+        print("db conn failed");
 
-    db = api.common.get_conn()
-
-    validate(server_schema, params)
+    try:
+        validate(server_schema, params)
+    except:
+        print("validate failed");
 
     if isinstance(params["port"], str):
         params["port"] = int(params["port"])
@@ -151,10 +157,10 @@ def add_server(params):
     params["sid"] = api.common.hash(params["name"])
 
     # Automatically set first added server as server_number 1
-    if db.shell_servers.count() == 0:
+    if db.shell_servers.count_documents({}) == 0:
         params["server_number"] = params.get("server_number", 1)
 
-    db.shell_servers.insert(params)
+    db.shell_servers.insert_one(params)
 
     return params["sid"]
 
@@ -191,7 +197,7 @@ def update_server(sid, params):
     if isinstance(params.get("server_number"), str):
         params["server_number"] = int(params["server_number"])
 
-    db.shell_servers.update({"sid": server["sid"]}, {"$set": params})
+    db.shell_servers.update_one({"sid": server["sid"]}, {"$set": params})
 
 
 def remove_server(sid):
@@ -208,7 +214,7 @@ def remove_server(sid):
         raise WebException(
             "Shell server with sid '{}' does not exist.".format(sid))
 
-    db.shell_servers.remove({"sid": sid})
+    db.shell_servers.delete_many({"sid": sid})
 
 
 def get_servers(get_all=False):
@@ -316,14 +322,14 @@ def get_assigned_server_number(new_team=True, tid=None):
     db = api.common.get_conn()
 
     if new_team:
-        team_count = db.teams.count()
+        team_count = db.teams.count_documents({})
     else:
         if not tid:
             raise InternalException("tid must be specified.")
         oid = db.teams.find_one({"tid": tid}, {"_id": 1})
         if not oid:
             raise InternalException("Invalid tid.")
-        team_count = db.teams.count({"_id": {"$lt": oid["_id"]}})
+        team_count = db.teams.count_documents({"_id": {"$lt": oid["_id"]}})
 
     assigned_number = 1
 
@@ -373,7 +379,7 @@ def reassign_teams(include_assigned=False):
         server_number = get_assigned_server_number(
             new_team=False, tid=team["tid"])
         if old_server_number != server_number:
-            db.teams.update({
+            db.teams.update_one({
                 'tid': team["tid"]
             }, {'$set': {
                 'server_number': server_number,

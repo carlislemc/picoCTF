@@ -75,16 +75,17 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'Flask==1.0.2',
-        'Flask-Bcrypt==0.7.1',
-        'Flask-Mail==0.9.1',
-        'gunicorn==19.8.1',
-        'line_profiler==2.1.2',
-        'py==1.5.3',
-        'pymongo==3.7.0',
-        'pytest==3.6.1',
-        'spur==0.3.20',
-        'voluptuous==0.11.1',
+        'Flask>=1.0.2',
+        'Flask-Bcrypt>=0.7.1',
+        'Flask-Mail>=0.9.1',
+        'gunicorn>=19.8.1',
+        'line_profiler>=4.1.3',
+        'py>=1.5.3',
+        'pymongo>=3.7.0',
+        'pytest>=3.6.1',
+        'cachelib',
+        'spur>=0.3.20',
+        'voluptuous>=0.15.2',
     ],
     tests_require=["selenium"],
     entry_points={

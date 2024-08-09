@@ -13,7 +13,6 @@
         'aptitude',         # required for apt module
         'curl',
         'git',
-        'python-passlib',   # required for htpasswd module
         'tmux',
         'vim-nox',
         # monitoring tools

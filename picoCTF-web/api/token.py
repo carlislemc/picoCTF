@@ -33,7 +33,7 @@ def set_token(key, token_name, token_value=None):
     if token_value is None:
         token_value = api.common.hash(str(key) + api.common.token())
 
-    db.tokens.update(
+    db.tokens.update_one(
         key, {'$set': {
             get_token_path(token_name): token_value
         }}, upsert=True)
@@ -52,7 +52,7 @@ def delete_token(key, token_name):
 
     db = api.common.get_conn()
 
-    db.tokens.update(key, {'$unset': {get_token_path(token_name): ''}})
+    db.tokens.update_one(key, {'$unset': {get_token_path(token_name): ''}})
 
 
 def find_key(query, multi=False):

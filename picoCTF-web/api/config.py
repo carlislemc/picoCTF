@@ -173,7 +173,7 @@ def get_settings():
     settings = db.settings.find_one({}, {"_id": 0})
 
     if settings is None:
-        db.settings.insert(default_settings)
+        db.settings.insert_one(default_settings)
         # Initialize indexes, runonce
         api.setup.index_mongo()
         return default_settings
@@ -201,4 +201,4 @@ def change_settings(changes):
 
     check_keys(settings, changes)
 
-    db.settings.update({"_id": settings["_id"]}, {"$set": changes})
+    db.settings.update_one({"_id": settings["_id"]}, {"$set": changes})

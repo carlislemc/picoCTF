@@ -120,7 +120,7 @@ class StatsHandler(logging.StreamHandler):
 
                 information["action"].update(action_result)
 
-            api.common.get_conn().statistics.insert(information)
+            api.common.get_conn().statistics.insert_one(information)
 
 
 class ExceptionHandler(logging.StreamHandler):
@@ -146,7 +146,7 @@ class ExceptionHandler(logging.StreamHandler):
             "visible": True
         })
 
-        api.common.get_conn().exceptions.insert(information)
+        api.common.get_conn().exceptions.insert_one(information)
 
 
 class SevereHandler(logging.handlers.SMTPHandler):

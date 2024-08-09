@@ -88,7 +88,7 @@ def add_problem_feedback(pid, uid, feedback):
 
     # update feedback if already present
     if get_problem_feedback(pid=pid, uid=uid) != []:
-        db.problem_feedback.update({
+        db.problem_feedback.update_one({
             "pid": pid,
             "uid": uid
         }, {"$set": {
@@ -96,7 +96,7 @@ def add_problem_feedback(pid, uid, feedback):
             "feedback": feedback
         }})
     else:
-        db.problem_feedback.insert({
+        db.problem_feedback.insert_one({
             "pid": pid,
             "uid": uid,
             "tid": team["tid"],

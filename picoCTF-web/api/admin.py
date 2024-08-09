@@ -22,7 +22,7 @@ def give_admin_role(name=None, uid=None):
     db = api.common.get_conn()
 
     user = api.user.get_user(name=name, uid=uid)
-    db.users.update({
+    db.users.update_one({
         "uid": user["uid"]
     }, {"$set": {
         "admin": True,
@@ -42,7 +42,7 @@ def give_teacher_role(name=None, uid=None):
     db = api.common.get_conn()
 
     user = api.user.get_user(name=name, uid=uid)
-    db.users.update({"uid": user["uid"]}, {"$set": {"teacher": True}})
+    db.users.update_one({"uid": user["uid"]}, {"$set": {"teacher": True}})
 
 
 def set_problem_availability(pid, disabled):
@@ -93,4 +93,4 @@ def dismiss_api_exceptions(trace):
     """
 
     db = api.common.get_conn()
-    db.exceptions.remove({"trace": trace})
+    db.exceptions.delete_many({"trace": trace})

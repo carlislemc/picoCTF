@@ -8,18 +8,18 @@
     password: "{{ shell_admin_password_crypt }}"
   no_log: True
 
-- include: dependencies.yml
+- import_tasks: dependencies.yml
   tags:
     - network
     - dependency
 
-- include: shell_manager.yml
+- import_tasks: shell_manager.yml
 
-- include: nginx.yml
+- import_tasks: nginx.yml
 
-- include: pam_and_services.yml
+- import_tasks: pam_and_services.yml
 
-- include: deploy_problems.yml
+- import_tasks: deploy_problems.yml
 
 - name: Ensure nginx is running
   service:

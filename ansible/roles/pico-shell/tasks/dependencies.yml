@@ -11,37 +11,56 @@
   apt:
     state: present
     name: [
+      # libraries for uwsgi
+      'libxml2-dev',
+      'libsodium-dev',
+      'libargon2-dev',
+      'libphp-embed',
       'software-properties-common',
       'xinetd',
       'dpkg',
       'dpkg-dev',
       'fakeroot',
-      'python-virtualenv',
-      'python-pip',       # used for pam module dependencies
       'python3',          # used by shell_manager
       'python3-pip',      # used for shell_manager dependencies
-      'python3.6',        # from PPA, to cover all likely interpreter directives
-      'python3.6-dev',
-      'python3.6-venv',
+      'python3-virtualenv',        
+      'python3-dev',
       'libffi-dev',
       'libssl-dev',
       'socat',
-      'php7.0-cli',       # php5 package deprecated
-      'php7.0-sqlite3',   # used to serve shellinabox and challenge binaries
+      'php-sqlite3',   # used to serve shellinabox and challenge binaries
+      'php-dev',
+      'php',       # php5 package deprecated
       'gcc-multilib',
       'nginx',
       'shellinabox']
 
 # Needed by templated challenge types
-- name: Install uwsgi and plugins for shell server
-  apt:
-    name: ['uwsgi', 'uwsgi-plugin-php', 'uwsgi-plugin-python3', 'uwsgi-plugin-python', 'python-flask']
-    state: present
+#- name: Install uwsgi and plugins for shell server
+#  apt:
+#    name: uwsgi #'uwsgi-plugin-php', 'uwsgi-plugin-python3', 'uwsgi-plugin-python', 'python-flask']
+#    state: present
+#
+- name: Pip install flask, uwsgi
+  pip:
+    name: ['uwsgi','Flask']
 
-- name: Install pam dependencies
-  apt:
-    name: ['libpam-python', 'python-setuptools']
-    state: present
+#- name: Install pam dependencies
+#  apt:
+#    name: ['libpam-python', 'python-setuptools']
+#    state: present
+# Install uwsgi 
+- name: Install uwsgi
+  shell: curl -o uwsgi_latest.tar.gz https://projects.unbit.it/downloads/uwsgi-lts.tar.gz && mkdir -p uwsgi_latest && tar zvxC uwsgi_latest --strip-components=1 -f uwsgi_latest.tar.gz 
+  become: Yes
+
+- name: Install uwsgi pt2
+  shell: cd uwsgi_latest && python3 setup.py install 
+  become: Yes
+
+- name: Install uwsgi pt3
+  shell: cd uwsgi_latest && python3 uwsgiconfig.py --plugin plugins/php core && python3 uwsgiconfig.py --plugin plugins/python  core && mkdir -p /usr/lib/uwsgi && cp *.so /usr/lib/uwsgi/
+  become: Yes
 
 # System python packages updates needed for pam_auth module and Ansible
 - name: Update pyOpenSSL
@@ -63,7 +82,7 @@
   pip:
     name: packaging
     virtualenv: "{{ virtualenv_dir }}"
-    virtualenv_python: python3.6
+    virtualenv_python: python3
 
 - name: Install python appdirs
   pip:
@@ -96,7 +115,7 @@
       'gdb',
       'nasm',
       'perl',
-      'python',
+      'python2',
       'python3',
       'ruby',
       # common command line tools
@@ -104,7 +123,6 @@
       'gawk',
       'grep',
       'jq',
-      'realpath',
       'sed',
       'silversearcher-ag',
       # editors
@@ -129,6 +147,9 @@
       # terminal multiplexers
       'screen',
       'tmux',
+      # pam
+      'libpython2.7',
+      'libpam-python',
       # z: misc
       'expect',
       'pandoc'] # for `pip install pwntools`

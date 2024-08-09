@@ -18,7 +18,7 @@
   args:
     executable: "{{ virtualenv_dir }}/bin/python"
   when: auto_add_shell
-  no_log: True
+    #no_log: True
 
 - name: Autoload Problems into web interface
   script: load_problems.py {{ shell_name }}
