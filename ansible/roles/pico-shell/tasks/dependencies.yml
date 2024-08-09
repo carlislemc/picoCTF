@@ -43,24 +43,24 @@
 #
 - name: Pip install flask, uwsgi
   pip:
-    name: ['uwsgi','Flask']
+    name: ['Flask']
 
 #- name: Install pam dependencies
 #  apt:
 #    name: ['libpam-python', 'python-setuptools']
 #    state: present
 # Install uwsgi 
-- name: Install uwsgi
-  shell: curl -o uwsgi_latest.tar.gz https://projects.unbit.it/downloads/uwsgi-lts.tar.gz && mkdir -p uwsgi_latest && tar zvxC uwsgi_latest --strip-components=1 -f uwsgi_latest.tar.gz 
-  become: Yes
-
-- name: Install uwsgi pt2
-  shell: cd uwsgi_latest && python3 setup.py install 
-  become: Yes
-
-- name: Install uwsgi pt3
-  shell: cd uwsgi_latest && python3 uwsgiconfig.py --plugin plugins/php core && python3 uwsgiconfig.py --plugin plugins/python  core && mkdir -p /usr/lib/uwsgi && cp *.so /usr/lib/uwsgi/
-  become: Yes
+#- name: Install uwsgi
+#  shell: curl -o uwsgi_latest.tar.gz https://projects.unbit.it/downloads/uwsgi-lts.tar.gz && mkdir -p uwsgi_latest && tar zvxC uwsgi_latest --strip-components=1 -f uwsgi_latest.tar.gz 
+#  become: Yes
+#
+#- name: Install uwsgi pt2
+#  shell: cd uwsgi_latest && python3 setup.py install 
+#  become: Yes
+#
+#- name: Install uwsgi pt3
+#  shell: cd uwsgi_latest && python3 uwsgiconfig.py --plugin plugins/php core && python3 uwsgiconfig.py --plugin plugins/python  core && mkdir -p /usr/lib/uwsgi && cp *.so /usr/lib/uwsgi/
+#  become: Yes
 
 # System python packages updates needed for pam_auth module and Ansible
 - name: Update pyOpenSSL
