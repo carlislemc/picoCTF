@@ -20,9 +20,9 @@
       'python-pip',       # used for pam module dependencies
       'python3',          # used by shell_manager
       'python3-pip',      # used for shell_manager dependencies
-      'python3.6',        # from PPA, to cover all likely interpreter directives
-      'python3.6-dev',
-      'python3.6-venv',
+      'python3.5',        # from PPA, to cover all likely interpreter directives
+      'python3.5-dev',
+      'python3.5-venv',
       'libffi-dev',
       'libssl-dev',
       'socat',
