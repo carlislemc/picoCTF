@@ -20,7 +20,7 @@
   pip:
     name: "file://{{ pico_web_api_dir }}"
     virtualenv: "{{ virtualenv_dir }}"
-    extra_args: "--upgrade"
+    extra_args: "--upgrade --no-binary ctf-web-api"
 
 - name: Compile CoffeeScript
   command: "cjsx -bc -o {{ pico_web_js_out_path }} {{ pico_web_coffescript_in_path }}"

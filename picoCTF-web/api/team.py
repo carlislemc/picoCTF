@@ -198,7 +198,7 @@ def create_team(params):
         params['server_number'] = api.shell_servers.get_assigned_server_number(
             new_team=True)
 
-    db.teams.insert(params)
+    db.teams.insert_one(params)
 
     return params['tid']
 
@@ -376,21 +376,21 @@ def join_team(team_name, password, uid=None):
 
     if api.auth.confirm_password(password, desired_team["password"]
                                 ) and desired_team["size"] < max_team_size:
-        user_team_update = db.users.find_and_modify(
-            query={
+        user_team_update = db.users.find_one_and_update(
+            {
                 "uid": user["uid"],
                 "tid": current_team["tid"]
             },
             update={"$set": {
                 "tid": desired_team["tid"]
             }},
-            new=True)
+            upsert=True)
 
         if not user_team_update:
             raise InternalException("There was an issue switching your team!")
 
-        desired_team_size_update = db.teams.find_and_modify(
-            query={
+        desired_team_size_update = db.teams.find_one_and_update(
+            {
                 "tid": desired_team["tid"],
                 "size": {
                     "$lt": max_team_size
@@ -399,10 +399,10 @@ def join_team(team_name, password, uid=None):
             update={"$inc": {
                 "size": 1
             }},
-            new=True)
+            upsert=True)
 
-        current_team_size_update = db.teams.find_and_modify(
-            query={
+        current_team_size_update = db.teams.find_one_and_update(
+            {
                 "tid": current_team["tid"],
                 "size": {
                     "$gt": 0
@@ -411,16 +411,16 @@ def join_team(team_name, password, uid=None):
             update={"$inc": {
                 "size": -1
             }},
-            new=True)
+            upsert=True)
 
         # Team country is no longer consistent amongst members. Flag as mixed and ineligible
         if user["country"] != desired_team["country"]:
-            db.teams.update({"tid": desired_team["tid"]}, {"$set": {"country": "??",
+            db.teams.update_one({"tid": desired_team["tid"]}, {"$set": {"country": "??",
                                                                     "eligible": False}})
 
         # Ineligible user has spoiled team eligibility
         if not user["eligible"] and desired_team["eligible"]:
-            db.teams.update({"tid": desired_team["tid"]}, {"$set": {"eligible": False}})
+            db.teams.update_one({"tid": desired_team["tid"]}, {"$set": {"eligible": False}})
 
         if not desired_team_size_update or not current_team_size_update:
             raise InternalException(
@@ -500,7 +500,7 @@ def update_password(tid, password):
     """
 
     db = api.common.get_conn()
-    db.teams.update({
+    db.teams.update_one({
         'tid': tid
     }, {'$set': {
         'password': api.common.hash_password(password)

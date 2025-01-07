@@ -213,7 +213,7 @@ def insert_problem(problem, sid=None):
             "Problem with identical name \"{}\" already exists.".format(
                 problem["name"]))
 
-    db.problems.insert(problem)
+    db.problems.insert_one(problem)
     api.cache.fast_cache.clear()
 
     return problem["pid"]
@@ -232,7 +232,7 @@ def remove_problem(pid):
     db = api.common.get_conn()
     problem = get_problem(pid=pid)
 
-    db.problems.remove({"pid": pid})
+    db.problems.delete_many({"pid": pid})
     api.cache.fast_cache.clear()
 
     return problem
@@ -263,7 +263,7 @@ def update_problem(pid, updated_problem):
     problem["pid"] = pid
     """
 
-    db.problems.update({"pid": pid}, problem)
+    db.problems.update_one({"pid": pid}, {'$set': problem})
     api.cache.fast_cache.clear()
 
     return problem
@@ -328,7 +328,7 @@ def assign_instance_to_team(pid, tid=None, reassign=False):
     team["instances"][pid] = iid
 
     db = api.common.get_conn()
-    db.teams.update({"tid": tid}, {"$set": team})
+    db.teams.update_one({"tid": tid}, {"$set": team})
 
     return instance_number
 
@@ -480,7 +480,7 @@ def submit_key(tid, pid, key, method, uid=None, ip=None):
         exp.data = {'code': 'repeat'}
         raise exp
 
-    db.submissions.insert(submission)
+    db.submissions.insert_one(submission)
 
     if submission["correct"]:
         api.cache.invalidate_memoization(
@@ -527,7 +527,7 @@ def count_submissions(pid=None,
     if eligibility is not None:
         match.update({"eligible": eligibility})
 
-    return db.submissions.find(match, {"_id": 0}).count()
+    return sum(1 for _ in db.submissions.find(match, {"_id": 0}))
 
 
 def get_submissions(pid=None,
@@ -582,7 +582,7 @@ def clear_all_submissions():
 
     if DEBUG_KEY is not None:
         db = api.common.get_conn()
-        db.submissions.remove()
+        db.submissions.delete_many({})
         api.cache.clear_all()
     else:
         raise InternalException("DEBUG Mode must be enabled")
@@ -611,7 +611,7 @@ def clear_submissions(uid=None, tid=None, pid=None):
     else:
         raise InternalException("You must supply either a tid, uid, or pid")
 
-    return db.submissions.remove(match)
+    return db.submissions.delete_many(match)
 
 
 def invalidate_submissions(pid=None, uid=None, tid=None):
@@ -637,7 +637,7 @@ def invalidate_submissions(pid=None, uid=None, tid=None):
     elif tid is not None:
         match.update({"tid": tid})
 
-    db.submissions.update(match, {"correct": False})
+    db.submissions.update_one(match, {'$set': {"correct": False}})
 
 
 def reevaluate_submissions_for_problem(pid):
@@ -664,7 +664,7 @@ def reevaluate_submissions_for_problem(pid):
 
     for key, change in keys.items():
         if change is not None:
-            db.submissions.update(
+            db.submissions.update_one(
                 {
                     "key": key
                 }, {"$set": {
@@ -1017,7 +1017,7 @@ def insert_bundle(bundle):
     bundle["bid"] = bid
     bundle["dependencies_enabled"] = False
 
-    db.bundles.insert(bundle)
+    db.bundles.insert_one(bundle)
 
 
 def load_published(data):
@@ -1074,7 +1074,7 @@ def update_bundle(bid, updates):
     validate(bundle_schema, bundle)
     bundle["bid"] = bid
 
-    db.bundles.update({"bid": bid}, {"$set": bundle})
+    db.bundles.update_one({"bid": bid}, {"$set": bundle})
 
 
 def get_all_bundles():

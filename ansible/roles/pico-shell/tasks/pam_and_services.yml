@@ -29,7 +29,7 @@
     mode: 0644
 
 - name: update pam sshd configs
-  command: bash -c "grep \"pam_session.py\" /etc/pam.d/sshd || echo \"session [success=ok default=bad] pam_python.so pam_session.py\" >> /etc/pam.d/sshd"
+  command: bash -c "grep \"pam_python.py\" /etc/pam.d/sshd || echo \"session [success=ok default=bad] pam_python.so pam_python.py\" >> /etc/pam.d/sshd"
 
 - name: Ensure /lib/security/ directory exists
   file:
@@ -38,21 +38,21 @@
     owner: root
     group: root
 
-- name: Copy pam_auth.py to deployed location
+- name: Copy pam_python.py to deployed location
   copy:
-    src: pam_auth.py
-    dest: "/lib/security/pam_auth.py"
+    src: pam_python.py
+    dest: "/lib/security/pam_python.py"
     owner: root
     group: root
     mode: 0644
 
-- name: Copy pam_session.py to deployed location
-  copy:
-    src: pam_session.py
-    dest: "/lib/security/pam_session.py"
-    owner: root
-    group: root
-    mode: 0644
+#- name: Copy pam_session.py to deployed location
+#  copy:
+# src: pam_session.py
+#    dest: "/lib/security/pam_session.py"
+#    owner: root
+#    group: root
+#    mode: 0644
 
 - name: Disable user crontab with whitelist
   copy:
@@ -96,7 +96,7 @@
   command: sysctl --system
 
 - name: Restart networking service to pickup new configs
-  command: systemctl restart networking
+  command: netplan apply
 
 - name: Copy over journald.conf
   copy:

@@ -14,7 +14,7 @@
 # pam-auth-update(8) for details.
 
 # shell_manager authentication module
-auth [success=done auth_err=die try_again=reset default=ignore] pam_python.so pam_auth.py
+auth [success=done auth_err=die try_again=reset default=ignore] pam_python.so pam_python.py
 
 # here are the per-package modules (the "Primary" block)
 auth	[success=1 default=ignore]	pam_unix.so nullok_secure

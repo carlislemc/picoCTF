@@ -37,6 +37,14 @@ import os
 import pwd
 import syslog
 import subprocess
+import grp
+import json
+import pwd
+import time
+from os.path import join
+
+import requests
+
 
 pamh = None
 
@@ -50,7 +58,7 @@ def pam_sm_open_session(_pamh, flags, argv):
     global pamh
     pamh = _pamh
 
-    syslog.syslog(syslog.LOG_DEBUG, "pam_session.py: pam_sm_open_session")
+    syslog.syslog(syslog.LOG_INFO, "pam_session.py: pam_sm_open_session")
     #    display("pam_session.py: pam_sm_open_session")
 
     try:
@@ -114,7 +122,7 @@ def pam_sm_open_session(_pamh, flags, argv):
                               options + all_properties)
 
     syslog.syslog(
-        syslog.LOG_DEBUG, "pam_session.py: modified %s with %s" %
+        syslog.LOG_INFO, "pam_session.py: modified %s with %s" %
         (slice_name, ','.join(all_properties)))
 
     # manually set the memory.memsw.limit_in_bytes limit for user.slice if possible so we don't run out of swap.
@@ -125,11 +133,11 @@ def pam_sm_open_session(_pamh, flags, argv):
                 'wb') as fobj:
             fobj.write('%dM' % memlimit_mb)
         syslog.syslog(
-            syslog.LOG_DEBUG,
+            syslog.LOG_INFO,
             "pam_session.py: set memory.memsw.limit_in_bytes to match")
     except:
         syslog.syslog(
-            syslog.LOG_DEBUG,
+            syslog.LOG_INFO,
             "pam_session.py: failed to modify memory.memsw.limit_in_bytes")
 
 
@@ -138,10 +146,10 @@ def pam_sm_open_session(_pamh, flags, argv):
 #    try:
 #        with open('/sys/fs/cgroup/memory/user.slice/memory.kmem.limit_in_bytes', 'wb') as fobj:
 #            fobj.write('%dM' % (memlimit_mb/2))
-#        syslog.syslog(syslog.LOG_DEBUG,
+#        syslog.syslog(syslog.LOG_INFO,
 #                      "pam_session.py: set memory.kmem.limit_in_bytes to half of user limit")
 #    except:
-#        syslog.syslog(syslog.LOG_DEBUG,
+#        syslog.syslog(syslog.LOG_INFO,
 #                      "pam_session.py: failed to modify memory.kmem.limit_in_bytes")
 
 ###### probably not really what we want.  Doesn't seem to help anything at least
@@ -149,10 +157,10 @@ def pam_sm_open_session(_pamh, flags, argv):
 #    try:
 #        with open('/sys/fs/cgroup/memory/user.slice/memory.swappiness', 'wb') as fobj:
 #            fobj.write('0')
-#        syslog.syslog(syslog.LOG_DEBUG,
+#        syslog.syslog(syslog.LOG_INFO,
 #                      "pam_session.py: set memory.swappiness")
 #    except:
-#        syslog.syslog(syslog.LOG_DEBUG,
+#        syslog.syslog(syslog.LOG_INFO,
 #                      "pam_session.py: failed to modify memory.swappiness")
 
 # dont set specific limits on user 0 and 1000 to make testing easier, but keep fair sharing
@@ -181,7 +189,7 @@ def pam_sm_open_session(_pamh, flags, argv):
                               options + each_properties)
 
     syslog.syslog(
-        syslog.LOG_DEBUG, "pam_session.py: modified %s with %s" %
+        syslog.LOG_INFO, "pam_session.py: modified %s with %s" %
         (slice_name, ','.join(each_properties)))
 
     return pamh.PAM_SUCCESS

@@ -1,27 +1,27 @@
 ---
 # Playbook that runs tasks common across all servers
 
-- include: ppas.yml
+- import_tasks: ppas.yml
   tags:
    - network
    - dependency
 
-- include: upgrade.yml
+- import_tasks: upgrade.yml
   tags:
     - network
     - dependency
 
-- include: utils.yml
+- import_tasks: utils.yml
   tags:
     - network
     - dependency
 
-- include: set_hostname.yml
+- import_tasks: set_hostname.yml
 
 # Local development environments are the only place the platform should
 # be loaded in directly via filesystem sync without being cloned from a
 # specific source and branch
-- include: clone_repo.yml
+- import_tasks: clone_repo.yml
   when: "'git' in sync_mode"			# coule be git or git_private
   tags:
     - network

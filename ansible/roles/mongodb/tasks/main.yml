@@ -5,18 +5,18 @@
 # https://docs.mongodb.org/manual/tutorial/install-mongodb-on-debian/
 # https://docs.mongodb.org/ecosystem/platforms/amazon-ec2/
 
-- include: install.yml
+- import_tasks: install.yml
   tags:
     - network
     - dependency
 
-- include: configure_storage.yml
+- import_tasks: configure_storage.yml
 
-- include: configure_mongo.yml
+- import_tasks: configure_mongo.yml
 
 # Default to running the database with authentication.  The development
 # environment is the only place `mongodb_conf_auth` should be false
-- include: configure_auth.yml
+- import_tasks: configure_auth.yml
   when: mongodb_conf_auth
 
 - name: Ensure mongodb is started
@@ -24,4 +24,4 @@
     name: "{{ mongodb_daemon_name }}"
     state: started
 
-- include: disable_thp.yml
+- import_tasks: disable_thp.yml

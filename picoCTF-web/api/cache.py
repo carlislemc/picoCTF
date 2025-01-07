@@ -21,7 +21,7 @@ def clear_all():
     """
 
     db = api.common.get_conn()
-    db.cache.remove()
+    db.cache.delete_many({})
     fast_cache.clear()
 
 
@@ -124,7 +124,7 @@ def set(key, value, timeout=None, fast=False):
         expireAt = datetime.datetime.now() + datetime.timedelta(seconds=timeout)
         update.update({"expireAt": expireAt})
 
-    db.cache.update(key, update, upsert=True)
+    db.cache.update_one(key, {'$set': update}, upsert=True)
 
 
 def timed_out(info):
@@ -195,4 +195,4 @@ def invalidate_memoization(f, *keys):
     search = {"function": "{}.{}".format(f.__module__, f.__name__)}
     search.update({"$or": list(keys)})
 
-    db.cache.remove(search)
+    db.cache.delete_many(search)

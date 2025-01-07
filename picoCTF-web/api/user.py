@@ -224,8 +224,8 @@ def create_user(username,
 
     max_team_size = api.config.get_settings()["max_team_size"]
 
-    updated_team = db.teams.find_and_modify(
-        query={
+    updated_team = db.teams.find_one_and_update(
+        {
             "tid": tid,
             "size": {
                 "$lt": max_team_size
@@ -234,13 +234,13 @@ def create_user(username,
         update={"$inc": {
             "size": 1
         }},
-        new=True)
+        upsert=True)
 
     if not updated_team:
         raise InternalException("There are too many users on this team!")
 
     # All teachers are admins.
-    if admin or db.users.count() == 0:
+    if admin or db.users.count_documents({}) == 0:
         admin = True
         teacher = True
 
@@ -263,7 +263,7 @@ def create_user(username,
         'extdata': {},
     }
 
-    db.users.insert(user)
+    db.users.insert_one(user)
 
     if settings["email"]["email_verification"] and not user["verified"]:
         api.email.send_user_verification_email(username)
@@ -475,7 +475,7 @@ def verify_user(uid, token_value):
     token_user = api.token.find_key_by_token("email_verification", token_value)
 
     if token_user["uid"] == uid:
-        db.users.find_and_modify({"uid": uid}, {"$set": {"verified": True}})
+        db.users.find_one_and_update({"uid": uid}, {"$set": {"verified": True}})
         api.token.delete_token({"uid": uid}, "email_verification")
         return True
     else:
@@ -522,7 +522,7 @@ def update_password(uid, password):
     """
 
     db = api.common.get_conn()
-    db.users.update({
+    db.users.update_one({
         'uid': uid
     }, {'$set': {
         'password_hash': api.common.hash_password(password)
@@ -539,7 +539,7 @@ def disable_account(uid):
     """
 
     db = api.common.get_conn()
-    result = db.users.update({
+    result = db.users.update_one({
         "uid": uid,
         "disabled": False
     }, {"$set": {
@@ -551,8 +551,8 @@ def disable_account(uid):
     # Making certain that we have actually made a change.
     # result["n"] refers to how many documents have been updated.
     if result["n"] == 1:
-        db.teams.find_and_modify(
-            query={
+        db.teams.find_one_and_update(
+            {
                 "tid": tid,
                 "size": {
                     "$gt": 0
@@ -561,7 +561,7 @@ def disable_account(uid):
             update={"$inc": {
                 "size": -1
             }},
-            new=True)
+            upsert=True)
 
 
 @log_action

@@ -21,7 +21,8 @@ from api.annotations import (api_wrapper, block_after_competition,
 from api.common import WebError, WebSuccess
 from flask import Flask, render_template, request, send_from_directory, session
 from flask_mail import Mail
-from werkzeug.contrib.fixers import ProxyFix
+#from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__, static_url_path="/")
 app.wsgi_app = ProxyFix(app.wsgi_app)

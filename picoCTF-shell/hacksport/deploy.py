@@ -9,6 +9,7 @@ LOCALHOST = "127.0.0.1"
 PROBLEM_FILES_DIR = "problem_files"
 STATIC_FILE_ROOT = "static"
 XINETD_SERVICE_PATH = "/etc/xinetd.d/"
+SERVICED_SERVICE_PATH = "/usr/lib/systemd/system"
 
 # will be set to the configuration module during deployment
 deploy_config = None
@@ -218,8 +219,7 @@ def create_service_files(problem, instance_number, path):
 
     # See https://github.com/puppetlabs/puppetlabs-xinetd/blob/master/templates/service.erb
     # and https://linux.die.net/man/5/xinetd.conf
-    xinetd_template = """
-service %s
+    xinetd_template = """service %s
 {
     type = UNLISTED
     port = %d
@@ -238,19 +238,36 @@ service %s
     server = %s
 }
 """
+    systemd_template = """[Unit]
+Description=%s
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%s%d
+Restart=always
+User=%s
+Group=%s
+KillMode=process
+"""
 
     is_service = isinstance(problem, Service)
     is_web = isinstance(problem, WebService)
+    print(str(is_service)+","+str(is_web))
     if not is_service and not is_web:
         return (None, None)
 
     problem_service_info = problem.service()
-    service_content = xinetd_template % (
-        problem.user, problem.port, "no"
-        if problem_service_info["Type"] == "oneshot" else "yes", problem.user,
-        problem.user, problem.user, "100"
-        if problem_service_info["Type"] == "oneshot" else "UNLIMITED",
-        problem_service_info['ExecStart'])
+    if not is_web:
+        service_content = xinetd_template % (
+            problem.user, problem.port, "no"
+            if problem_service_info["Type"] == "oneshot" else "yes", problem.user,
+            problem.user, problem.user, "100"
+            if problem_service_info["Type"] == "oneshot" else "UNLIMITED",
+            problem_service_info['ExecStart'])
+    else:
+        service_content = systemd_template % (
+            problem.user, problem_service_info['ExecStart'], problem.port, problem.user, problem.user)
 
     service_file_path = join(path, "{}".format(problem.user))
 
@@ -474,7 +491,7 @@ def deploy_files(staging_directory, instance_directory, file_list, username,
         os.chmod(instance_directory, 0o750)
 
 
-def install_user_service(service_file, socket_file):
+def install_user_service(service_file, socket_file, deployment_directory):
     """
     Installs the service file and socket file into the xinetd
     service directory, sets the service to start on boot, and
@@ -490,10 +507,24 @@ def install_user_service(service_file, socket_file):
     service_name = os.path.basename(service_file)
 
     logger.debug("...Installing user service '%s'.", service_name)
+    is_web = False
+    with open(service_file) as f:
+            first_line = f.readline()
+            if "Unit" in first_line:
+                is_web = True
 
     # copy service file
-    service_path = os.path.join(XINETD_SERVICE_PATH, service_name)
-    shutil.copy2(service_file, service_path)
+    if not is_web:
+       service_path = os.path.join(XINETD_SERVICE_PATH, service_name)
+       shutil.copy2(service_file, service_path)
+    else:
+       service_path = os.path.join(SERVICED_SERVICE_PATH, service_name)
+       shutil.copy2(service_file, service_path+".service")
+       with open(service_path+".service", 'a') as file:
+               file.write('RuntimeDirectory='+deployment_directory)
+       execute(["systemctl", "daemon-reload"], timeout=60)
+       execute(["service", service_name, "start"], timeout=60)
+
 
 
 def generate_instance(problem_object,
@@ -694,6 +725,7 @@ def deploy_problem(problem_directory,
     instance_list = []
 
     need_restart_xinetd = False
+    need_restart_serviced = False
 
     logger.debug("Beginning to deploy problem '%s'.", problem_object["name"])
 
@@ -761,8 +793,9 @@ def deploy_problem(problem_directory,
 
             if instance["service_file"] is not None:
                 install_user_service(instance["service_file"],
-                                     instance["socket_file"])
+                                     instance["socket_file"],deployment_directory)
                 # set to true, this will signal restart xinetd
+                need_restart_serviced = True
                 need_restart_xinetd = True
 
             # keep the staging directory if run with debug flag
@@ -931,6 +964,7 @@ def deploy_problems(args, config):
         # Restart xinetd unless specified. Service must be manually restarted
         if not args.no_restart and need_restart_xinetd:
             execute(["service", "xinetd", "restart"], timeout=60)
+            execute(["systemctl", "daemon-reload"], timeout=60)
 
         logger.debug("Releasing lock file %s", lock_file)
         if not args.dry:
@@ -958,6 +992,8 @@ def remove_instances(path, instance_list):
 
             logger.debug("...Removing xinetd service '%s'.", service)
             os.remove(join(XINETD_SERVICE_PATH, service))
+            logger.debug("...Removing xinetd service '%s'.", service)
+            os.remove(join(SERVICED_SERVICE_PATH, service))
 
             logger.debug("...Removing deployment directory '%s'.", directory)
             shutil.rmtree(directory)
@@ -968,6 +1004,7 @@ def remove_instances(path, instance_list):
 
     if problem_instances:
         execute(["service", "xinetd", "restart"], timeout=60)
+        execute(["systemctl", "daemon-reload"], timeout=60)
 
 def undeploy_problems(args, config):
     """ Main entrypoint for problem undeployment """

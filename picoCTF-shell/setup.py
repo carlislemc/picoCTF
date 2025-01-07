@@ -76,12 +76,12 @@ setup(
     install_requires=[
         'coloredlogs==10.0',
         'Flask==1.0.2',
-        'Jinja2==2.10',
+        'Jinja2>=3.1.4',
         'openssh-wrapper==0.4',
         'psutil==5.4.6',
         'pytest==3.6.1',
         'spur==0.3.20',
-        'voluptuous==0.11.1',
+        'voluptuous==0.15.2',
         'Werkzeug==0.14.1',
     ],
 

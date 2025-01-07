@@ -187,7 +187,7 @@ def set_earned_achievements_seen(tid=None, uid=None):
     else:
         raise InternalException("You must specify either a tid or uid")
 
-    db.earned_achievements.update(match, {"$set": {"seen": True}}, multi=True)
+    db.earned_achievements.update_many(match, {"$set": {"seen": True}})
 
 
 def get_earned_achievements_display(tid=None, uid=None):
@@ -312,7 +312,7 @@ def insert_earned_achievement(aid, data):
     tid, uid = data.pop("tid"), data.pop("uid")
     name, description = data.pop("name"), data.pop("description")
 
-    db.earned_achievements.insert({
+    db.earned_achievements.insert_one({
         "aid": aid,
         "tid": tid,
         "uid": uid,
@@ -383,7 +383,7 @@ def insert_achievement(achievement):
     if safe_fail(get_achievement, name=achievement["name"]) is not None:
         raise WebException("achievement with identical name already exists.")
 
-    db.achievements.insert(achievement)
+    db.achievements.insert_one(achievement)
     api.cache.fast_cache.clear()
 
     return achievement["aid"]
@@ -416,7 +416,7 @@ def update_achievement(aid, updated_achievement):
     validate(achievement_schema, achievement)
     achievement["aid"] = aid
 
-    db.achievements.update({"aid": aid}, achievement)
+    db.achievements.update_one({"aid": aid}, {'$push' : achievement})
     api.cache.fast_cache.clear()
 
     return achievement

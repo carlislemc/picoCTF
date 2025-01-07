@@ -7,7 +7,9 @@ import bcrypt
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, InvalidName
 from voluptuous import Invalid, MultipleInvalid
-from werkzeug.contrib.cache import SimpleCache
+#from werkzeug.contrib.cache import SimpleCache
+from cachelib import SimpleCache
+
 
 cache = SimpleCache()
 
@@ -24,7 +26,7 @@ def get_conn():
     """
 
     global __client, __connection
-    if not __connection:
+    if __connection is None:
         try:
             # Allow more complex mongodb connections
             conf = api.app.app.config

@@ -121,7 +121,7 @@ def list_problems(args):
 def clear_collections(args):
     db = api.common.get_conn()
     for collection in args.collections:
-        db[collection].remove()
+        db[collection].delete_many({})
 
 
 def get_output_file(output):
