@@ -278,7 +278,7 @@ class WebService(Service):
             raise Exception("Must specify start_cmd for services.")
         #open(self.username+".service", 'w').write(XINETD_WEB_SCRIPT % self.start_cmd)
         #self.start_cmd = join(self.directory, "xinet_startup.sh")
-        #self.service_files.append(ExecutableFile("xinet_startup.sh"))
+        #self.service_files.append(ExecutableFile(self.username+".service"))
 
 
 class FlaskApp(WebService):
