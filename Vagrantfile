@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
 
     shell.vm.provision "shell", path: "vagrant/provision_scripts/install_ansible.sh"
     shell.vm.provision :ansible_local do |ansible|
-      ansible.compatibility_mode = "2.0"
+      ansible.compatibility_mode = "auto"
       ansible.playbook = "site.yml"
       ansible.limit = "shell"
       ansible.provisioning_path = "/picoCTF/ansible/"
@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
 
     web.vm.provision "shell", path: "vagrant/provision_scripts/install_ansible.sh"
     web.vm.provision :ansible_local do |ansible|
-      ansible.compatibility_mode = "2.0"
+      ansible.compatibility_mode = "auto"
       ansible.playbook = "site.yml"
       ansible.limit = ["db", "web"]
       ansible.provisioning_path = "/picoCTF/ansible/"
