@@ -51,6 +51,12 @@ class Directory(File):
     Wrapper for specifying permissions for your subdirectories
     """
 
+class GroupWriteDirectory(Directory):
+    """
+    Wrapper for specifying a group owned subdir with write permissions
+    """
+    def __init__(self, path, permissions=0o770):
+        super().__init__(path, permissions=permissions)
 
 class PreTemplatedFile(File):
     """
