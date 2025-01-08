@@ -16,7 +16,7 @@
   pip:
     name: pymongo
     virtualenv: "{{ virtualenv_dir }}"
-    virtualenv_python: python3.6
+    virtualenv_python: python3
 
 - name: Install python packaging
   pip:
