@@ -23,14 +23,9 @@
       'fakeroot',
       'python3',          # used by shell_manager
       'python3-pip',      # used for shell_manager dependencies
-<<<<<<< HEAD
       'python3.5',        # from PPA, to cover all likely interpreter directives
       'python3.5-dev',
       'python3.5-venv',
-=======
-      'python3-virtualenv',        
-      'python3-dev',
->>>>>>> ae0fbf8444ce485695c293254147274421f2c052
       'libffi-dev',
       'libssl-dev',
       'socat',
