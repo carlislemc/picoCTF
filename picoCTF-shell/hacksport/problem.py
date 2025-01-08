@@ -319,7 +319,7 @@ class FlaskApp(WebService):
             assert False, "Python version {} is invalid".format(python_version)
 
         self.service_files = [File(self.app_file)]
-        self.start_cmd = "python3 -m {} ".format(http_version)
+        self.start_cmd = "python3 -m {} ".format(http_server)
         #self.start_cmd = "uwsgi --protocol=http --plugins-dir=/usr/lib/uwsgi --plugin python{} -p {} -w {} --logto /dev/null".format(plugin_version, self.num_workers, self.app)
 
 
