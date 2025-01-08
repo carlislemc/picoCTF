@@ -1,6 +1,5 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
 # TODO:
 # - mount_options looks really fishy
 # - use double quote correctly
